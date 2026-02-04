@@ -1,11 +1,35 @@
+'use client'
+
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { signupUser } from "@/service/Auth";
 
 export default function SignupPage() {
+    const router = useRouter();
+    const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", password: "" });
+
+    const signupMutation = useMutation({
+        mutationFn: signupUser,
+        onSuccess: () => {
+            alert("Account created! Please log in.");
+            router.push("/login");
+        },
+        onError: (error) => {
+            alert(error.response?.data?.message || "Signup failed.");
+        }
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        signupMutation.mutate(formData);
+    };
+
     return (
         <div className="flex min-h-screen bg-white">
-            {/* LEFT SIDE: FORM */}
             <div className="flex w-full flex-col justify-center px-6 py-12 md:w-1/2 lg:px-20 xl:px-32">
-                <div className="mx-auto w-full max-w-sm">
+                <div className="mx-auto w-full max-sm">
                     <Link href="/" className="flex items-center gap-2 text-2xl font-black tracking-tighter text-blue-700 mb-10">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg rotate-12 flex items-center justify-center text-white text-sm italic">F</div>
                         FreshMart
@@ -19,36 +43,63 @@ export default function SignupPage() {
                         </Link>
                     </p>
 
-                    <form className="mt-10 space-y-6">
+                    <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700">First Name</label>
-                                <input type="text" className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all" placeholder="John" />
+                                <input
+                                    type="text"
+                                    required
+                                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="John"
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700">Last Name</label>
-                                <input type="text" className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all" placeholder="Doe" />
+                                <input
+                                    type="text"
+                                    required
+                                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="Doe"
+                                />
                             </div>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700">Email Address</label>
-                            <input type="email" className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all" placeholder="name@company.com" />
+                            <input
+                                type="email"
+                                required
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="name@company.com"
+                            />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700">Password</label>
-                            <input type="password" className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all" placeholder="••••••••" />
+                            <input
+                                type="password"
+                                required
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="••••••••"
+                            />
                         </div>
 
-                        <button type="submit" className="flex w-full justify-center rounded-xl bg-blue-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] transition-all">
-                            Create Account
+                        <button
+                            type="submit"
+                            disabled={signupMutation.isPending}
+                            className="flex w-full justify-center rounded-xl bg-blue-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-70"
+                        >
+                            {signupMutation.isPending ? "Creating account..." : "Create Account"}
                         </button>
                     </form>
                 </div>
             </div>
 
-            {/* RIGHT SIDE: IMAGE */}
             <div className="relative hidden w-0 flex-1 lg:block">
                 <img
                     className="absolute inset-0 h-full w-full object-cover"
